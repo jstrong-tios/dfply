@@ -36,6 +36,50 @@ def arrange(df, *args, **kwargs):
     sorter = sorter.sort_values(sorter.columns.tolist(), **kwargs)
     return df.iloc[sorter.index, :]
 
+@dfpipe
+def sort_values(df, *args, **kwargs):
+    """Alternative calling interface to `arrange`/`DataFrame.sort_values` that places a higher
+    emphasis on brevity.
+
+    Never type the nine letters of "ascending" again! column names prefixed with "-"
+    will be sorted in descending order.
+
+    # Example
+
+    ```
+    df = pd.DataFrame(np.random.random((10, 4)), columns=list('abcd'))
+
+    (df >> sort_values('-d', 'b')) == df.sort_values(by=['d', 'b'], ascending=[False, True])
+    ```
+
+    Args:
+        *args: String column names, with optional "-" prefix indicating descending order. Columns
+            will be sorted in order passed.
+
+    Kwargs:
+        **kwargs: Any keyword arguments will be passed through to the pandas
+            `DataFrame.sort_values` function. To avoid accidental misuse, passing
+            `by` or `ascending` as keyword args will raise a `NotImplementedError`.
+    """
+
+    for illegal_kwarg in ['ascending', 'by']:
+        if illegal_kwarg in kwargs:
+            raise NotImplementedError(f"`dfply.select.sort_values` does not implement the '{illegal_kwarg}' keyword argument")
+
+    if len(args) < 1:
+        raise ValueError("no columns specified to sort by (len(args) == 0)")
+
+    by = []
+    ascending = []
+    for col in args:
+        if col.startswith("-"):
+            by.append(col[1:])
+            ascending.append(False)
+        else:
+            by.append(col)
+            ascending.append(True)
+
+    return df.sort_values(by=by, ascending=ascending, **kwargs)
 
 # ------------------------------------------------------------------------------
 # Renaming

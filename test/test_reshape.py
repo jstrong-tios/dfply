@@ -1,4 +1,7 @@
 import pytest
+import itertools
+import pandas as pd
+import numpy as np
 
 from dfply.glob import *
 
@@ -38,6 +41,60 @@ def test_arrange():
     print('d', d >> head(5))
     assert df.equals(d)
 
+def test_sort_values():
+    df = diamonds.groupby('cut').apply(arrange_apply_helperfunc).reset_index(drop=True)
+    d = (diamonds >> group_by('cut') >> sort_values('-depth') >>
+         head(5) >> ungroup()).reset_index(drop=True)
+    #print('df', df, df.shape)
+    #print('d', d, d.shape)
+    assert df.equals(d)
+
+    d = (diamonds >> group_by('cut') >> sort_values('-depth') >>
+         head(5) >> ungroup()).reset_index(drop=True)
+    assert df.equals(d)
+
+    print(type(d), type(df), type(diamonds))
+
+    df = diamonds.sort_values(['cut','price'], ascending=False)
+    d = diamonds >> sort_values('-cut', '-price')
+    print('df', df >> head(5))
+    print('d', d >> head(5))
+    assert df.equals(d)
+
+def test_sort_values_extended():
+    n = 128
+    df = pd.DataFrame({
+        'a': np.array(['red', 'blue', 'yellow'])[np.random.binomial(2, p=0.3, size=(n,))],
+        'b': np.random.random((n,)),
+        'c': np.arange(n).astype(np.int64),
+        'd': np.random.binomial(1, p=0.5, size=(n,)).astype(np.bool),
+    })
+    df['a'] = df['a'].astype('category')
+    cols = df.columns
+    asc_desc_pairs = [(c, f"-{c}") for c in cols]
+    for sort_order in itertools.product(*asc_desc_pairs): # every possible combination
+        # reverse engineer to recover sort_values args
+        cols = []
+        asc = []
+        for c in sort_order:
+            if c.startswith("-"):
+                cols.append(c[1:])
+                asc.append(False)
+            else:
+                cols.append(c)
+                asc.append(True)
+
+        a = df >> sort_values(*sort_order)
+        b = df.sort_values(by=cols, ascending=asc)
+        assert np.all(a == b)
+
+def test_sort_disallows_footgun_kwargs():
+    df = pd.DataFrame(np.random.random((12,4)), columns=list('abcd'))
+    for kw in ['ascending', 'by']:
+        with pytest.raises(NotImplementedError):
+            kwargs = {}
+            kwargs[kw] = True
+            df >> sort_values('-a', **kwargs)
 
 def test_rename():
     df = diamonds.rename(columns={'cut':'Cut','table':'Table','carat':'Carat'})
