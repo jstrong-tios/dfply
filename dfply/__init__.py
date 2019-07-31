@@ -1,18 +1,3 @@
-from .base import *
-from .group import *
-from .join import *
-from .reshape import *
-from .select import *
-from .select import *
-from .set_ops import *
-from .subset import *
-from .summarize import *
-from .transform import *
-from .data import diamonds
-from .summary_functions import *
-from .window_functions import *
-from .vector import *
-
-for verb in dir():
-    if 'ize' in verb:
-        exec(verb.replace('ize', 'ise') + '=' + verb)
+from .glob import X, arrange, distinct, drop, filter_by, group_by, head, left_join, \
+    mutate, pull, rename, sample, select, summarize, summarize_each, tail, transmute, \
+    pipe, dfpipe, make_symbolic

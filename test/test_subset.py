@@ -1,6 +1,6 @@
 import pytest
 
-from dfply import *
+from dfply.glob import *
 
 
 ##==============================================================================
