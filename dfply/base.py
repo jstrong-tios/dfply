@@ -75,7 +75,8 @@ class Intention(object):
                          invert=self.inverted)
 
     def __invert__(self):
-        return Intention(self.function, invert=not self.inverted)
+        #return Intention(self.function, invert=not self.inverted)
+        raise NotImplementedError("use of invert operator disabled for safety")
 
     def __call__(self, *args, **kwargs):
         return Intention(lambda x: self.function(x)(*_context_args(args)(x),

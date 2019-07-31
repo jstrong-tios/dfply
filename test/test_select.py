@@ -23,13 +23,18 @@ def test_select():
     assert df.equals(diamonds >> select([X.loc[:, ['carat','cut','price']]]))
 
 
-def test_select_inversion():
+def test_select_inversion_raises():
     df = diamonds.iloc[:, 3:]
-    d = diamonds >> select(~X.carat, ~X.cut, ~X.color)
-    print(df.head())
-    print(d.head())
-    assert df.equals(d)
+    with pytest.raises(NotImplementedError):
+        d = diamonds >> select(~X.carat, ~X.cut, ~X.color)
 
+def test_broken_invert_example():
+    # see https://github.com/kieferk/dfply/issues/60
+    df  = pd.DataFrame({'a':[np.nan,2,3,4,5],'b':[6,7,8,9,np.nan],'c':[5,4,3,2,1]})
+    expected = df['a'].isnull() | (~df['b'].isnull())
+    assert np.all(expected == (df >> transmute(result=(X.a.isnull() | X.b.notnull())) >> pull('result')))
+    with pytest.raises(NotImplementedError):
+        df >> transmute(m = (X.a.isnull()) | (~X.b.isnull()))
 
 def test_drop():
     df = diamonds.drop(['carat','cut','price'], axis=1)
