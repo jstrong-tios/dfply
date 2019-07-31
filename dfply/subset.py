@@ -56,7 +56,7 @@ def row_slice(df, indices):
 # ------------------------------------------------------------------------------
 
 @dfpipe
-def mask(df, *args):
+def filter_by(df, *args):
     mask = pd.Series(np.ones(df.shape[0], dtype=bool))
     for arg in args:
         if arg.dtype != bool:
@@ -65,7 +65,7 @@ def mask(df, *args):
     return df[mask.values]
 
 
-filter_by = mask   # alias for mask()
+#filter_by = mask   # alias for mask()
 
 
 @dfpipe

@@ -78,11 +78,11 @@ def test_row_slice():
 
 
 def test_mask():
-    test1 = diamonds >> mask(X.cut == 'Ideal')
+    test1 = diamonds >> filter_by(X.cut == 'Ideal')
     df = diamonds[diamonds.cut == 'Ideal']
     assert df.equals(test1)
 
-    test2 = diamonds >> mask(X.cut == 'Ideal', X.color == 'E',
+    test2 = diamonds >> filter_by(X.cut == 'Ideal', X.color == 'E',
                              X.table < 55, X.price < 500)
     df_mask = (diamonds.cut == 'Ideal') & (diamonds.color == 'E')
     df_mask = df_mask & (diamonds.table < 55) & (diamonds.price < 500)
